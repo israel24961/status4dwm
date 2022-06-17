@@ -1,7 +1,7 @@
 # STATUS4DWM
-Simple status for [dwm] (https://dwm.suckless.org/)
+Simple status for [dwm](https://dwm.suckless.org/)
 
-##Build
+## Build
 A simple make would be enough
 ```
 git clone https://github.com/israel24961/status4dwm
