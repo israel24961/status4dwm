@@ -10,6 +10,8 @@ make
 ```
 ## How it works
 Simple linked list of structs,with  period of execution, function to execute and message
+
+```
                   ┌───────────┐
                   │ CPU usage │
                   └─────┬─────┘
@@ -28,4 +30,4 @@ Simple linked list of structs,with  period of execution, function to execute and
                                        ┌──┴───┐   ┌──┴───┐  ┌──────┴───────┐  ┌──┴───┐
                                        │ 110$ │   │ 150s │  │ binanceAPI() │  │ NULL │
                                        └──────┘   └──────┘  └──────────────┘  └──────┘
-
+```
