@@ -64,7 +64,8 @@ void stat_run(stat_stuff* st,time_t now) {
         if(current->msg.txt != NULL)
             st->complete_msg.len+=current->msg.len;
     }
-    CHK_MALLOC(total_msg,char,st->complete_msg.len);
+    CHK_MALLOC(total_msg,char,st->complete_msg.len+1);
+    total_msg[st->complete_msg.len]=0;
     current=st->head;
     for(size_t offset=0;current!=NULL;current=current->next){
         strncpy(total_msg+offset, current->msg.txt, current->msg.len);
