@@ -1,7 +1,7 @@
 # STATUS4DWM
-Simple status for [dwm] (https://dwm.suckless.org/)
+Simple status for [dwm](https://dwm.suckless.org/)
 
-##Build
+## Build
 A simple make would be enough
 ```
 git clone https://github.com/israel24961/status4dwm
@@ -10,6 +10,8 @@ make
 ```
 ## How it works
 Simple linked list of structs,with  period of execution, function to execute and message
+
+```
                   ┌───────────┐
                   │ CPU usage │
                   └─────┬─────┘
@@ -28,4 +30,4 @@ Simple linked list of structs,with  period of execution, function to execute and
                                        ┌──┴───┐   ┌──┴───┐  ┌──────┴───────┐  ┌──┴───┐
                                        │ 110$ │   │ 150s │  │ binanceAPI() │  │ NULL │
                                        └──────┘   └──────┘  └──────────────┘  └──────┘
-
+```
