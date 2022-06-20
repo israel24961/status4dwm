@@ -1,12 +1,12 @@
 include config.mk
-SRCS= ${SRCDIR}/${NAME}.c
+SRCS= ${SRCDIR}/${NAME}.c ${SRCDIR}/stat_stuff.c
 
 all: config.mk info build ${SRCS}
 
 
 
 build: dirs ${SRCS}
-	@${CC} ${SRCS} -o ${BINDIR}/${NAME}
+	@${CC} ${SRCS} -o ${BINDIR}/${NAME} ${CFLAGS} ${CLIBS}
 
 clean: 
 	@echo "Cleaning"

@@ -12,7 +12,7 @@ BINDIR=bin
 CLIBS =  
 
 # flags
-CFLAGS   = -std=c17 -pedantic -Wall -Os ${CLIBS}
+CFLAGS   = -std=c17 -pedantic -Wall -Os
 
 # compiler and linker
 CC= cc -lm
