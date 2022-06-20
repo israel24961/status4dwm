@@ -6,16 +6,18 @@
 void task_2secs(stat_node* st);
 void task_5secs(stat_node* st);
 void xsetroot_update(stat_stuff* st);
+void get_cpu_usage(stat_node* st);
 
 int main()
 {
     stat_stuff* st=stat_init();
     stat_add(st,2.0f,task_2secs);
     stat_add(st,5.0f,task_5secs);
+    stat_add(st,3.0f,get_cpu_usage);
     while(1) {
         sleep(1);
         stat_run(st,time(NULL));
-        printf("%s\n", stat_msg(st));
+        //printf("%s\n", stat_msg(st));
         xsetroot_update(st);
     }
     return 0;
@@ -43,6 +45,27 @@ void xsetroot_update(stat_stuff* st)
         }
     }
     wait(NULL);
+}
+void get_cpu_usage(stat_node* st)
+{
+#define st_constmsg(st,str) st->msg.txt=str;st->msg.len=sizeof(str);
+    char* format="\U0001F4BF%.2f,%.2f,%.2f";
+    double avgs[3];
+    if(getloadavg(avgs,3)<0)
+    {
+        st_constmsg(st,"error load avg");
+        return;
+    }
+    st->msg.len=snprintf(NULL,0,format,avgs[0],avgs[1],avgs[2]);
+    void* tmp=NULL;
+    if(NULL==(tmp=realloc(st->msg.txt,st->msg.len+1))) {
+        st_constmsg(st,"error realloc");
+        return;
+    }else {
+        st->msg.txt=tmp;
+        snprintf(st->msg.txt,st->msg.len+1,format,avgs[0],avgs[1],avgs[2]);
+    }
+    return;
 }
 void task_5secs(stat_node* st){
     static int i=0;
