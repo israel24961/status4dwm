@@ -1,5 +1,7 @@
 include config.mk
-SRCS= ${SRCDIR}/${NAME}.c ${SRCDIR}/stat_stuff.c
+SRCS= ${SRCDIR}/${NAME}.c			\
+			${SRCDIR}/stat_stuff.c	\
+			${SRCDIR}/tasks.c
 
 all: config.mk info build ${SRCS}
 
