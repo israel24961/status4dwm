@@ -2,6 +2,12 @@
 Simple status for [dwm](https://dwm.suckless.org/)
 
 ## Build
+### Libraries needed:
+
+|Distro|packets|gcc -l(already in the makefile)|
+|---|---|---|
+|Arch|[curl](https://archlinux.org/packages/?name=curl),[json-c](https://archlinux.org/packages/core/x86_64/json-c)|-lcurl -ljson-c|
+
 A simple make would be enough
 ```
 git clone https://github.com/israel24961/status4dwm
