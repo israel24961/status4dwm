@@ -31,3 +31,5 @@ Simple linked list of structs,with  period of execution, function to execute and
                                        │ 110$ │   │ 150s │  │ binanceAPI() │  │ NULL │
                                        └──────┘   └──────┘  └──────────────┘  └──────┘
 ```
+## Extra:
+xmr_query is implemented in the [libcurl](https://github.com/israel24961/status4dwm/tree/libcurl) branch of this same repository, using a [public api](https://binance-docs.github.io/apidocs/spot/en/#wallet-endpoints) to Binance spot(i think) market, the bid side.
