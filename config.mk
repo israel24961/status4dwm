@@ -9,8 +9,8 @@ SRCDIR=src
 BINDIR=bin
 
 # includes and libs
-CLIBS =  
-
+CLIBS = -lcurl	\
+				-I/usr/include/json-c -ljson-c
 # flags
 CFLAGS   = -std=c17 -pedantic -Wall -Os
 

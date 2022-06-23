@@ -1,6 +1,7 @@
 #include "tasks.h"
 #include <sys/wait.h>
 #include <unistd.h>
+
 void task_2secs(stat_node* st){
     static int j=0;
     free(st->msg.txt);
@@ -63,6 +64,78 @@ void task_5secs(stat_node* st){
     snprintf(st->msg.txt,st->msg.len+1,"%fSecs:%i",st->period_secs,i++);
 }
 //-lcurl
+#include <curl/curl.h>
+#include <json-c/json.h>
+
+static int CURL_GLOBAL_CALLED=0;
+//Null ended *buffer, ensured
+size_t get_xmr_write_data(void* buffer,size_t size, size_t nmemb,void *userp){
+    size_t realsize = size * nmemb;
+  struct {char* bytes;size_t size;} *mem =userp;
+
+  char *ptr = realloc(mem->bytes, mem->size + realsize + 1);
+  if(!ptr) {
+    /* out of memory! */
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+
+  mem->bytes = ptr;
+  memcpy(&(mem->bytes[mem->size]), buffer, realsize);
+  mem->size += realsize;
+  mem->bytes[mem->size] = 0;//Null ended
+
+  return realsize;
+return size;
+}
+double get_xmr_curl_setup(stat_node* st) {
+    if(CURL_GLOBAL_CALLED==0) {
+        CURL_GLOBAL_CALLED=1;
+        curl_global_init(CURL_GLOBAL_SSL);
+    }
+    static CURL *hnd=NULL;
+
+    if(hnd==NULL)
+    {
+    hnd = curl_easy_init();
+    curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
+    curl_easy_setopt(hnd, CURLOPT_URL, "https://api.binance.com/api/v3/depth\?symbol=XMRUSDT&limit=1");
+    curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1L);
+    curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.83.1");
+    curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
+    curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+    curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
+    curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(hnd,CURLOPT_WRITEFUNCTION,get_xmr_write_data);
+    }
+    struct {char* bytes;size_t size;} dmem={.bytes=malloc(0),.size=0};
+    curl_easy_setopt(hnd,CURLOPT_WRITEDATA,&dmem);
+    CURLcode ret= curl_easy_perform(hnd);
+
+    //curl_easy_cleanup(hnd);
+    //hnd = NULL;
+
+    json_object *obj=json_tokener_parse(dmem.bytes);
+    json_object *arr= json_object_object_get(obj,"bids");
+    if(json_object_get_type(arr) != json_type_array)
+        st_constmsg(st,"err: hackers attacking");
+    json_object *arr_0=json_object_array_get_idx(arr,0);
+    json_object *val=json_object_array_get_idx(arr_0,0);
+    double i=json_object_get_double(val);
+    json_object_put(obj);
+    return i;
+}
 void get_xmr(stat_node* st){
-    st_constmsg(st,"hi");
+    if (system("ping -c 1 -W 1 8.8.8.8 1>/dev/null 2>/dev/null")!=0)
+    {
+        st_constmsg(st,"NoInternet");
+    }
+    double i=get_xmr_curl_setup(st);
+    free(st->msg.txt);
+    const char * fmt="💵/XMR: %.2f";
+    st->msg.len=snprintf(NULL,0,fmt,i);
+    st->msg.txt=malloc(st->msg.len+1);
+    snprintf(st->msg.txt,st->msg.len+1,fmt,i);
 }
