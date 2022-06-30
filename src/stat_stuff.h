@@ -1,11 +1,12 @@
 #ifndef stat_stuff_h
 #define stat_stuff_h
 
-#include <time.h>
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <strings.h>
+#include <stdarg.h>
 typedef  struct  stat_stuff stat_stuff;
 typedef struct stat_node stat_node;
 typedef struct stat_node
@@ -21,5 +22,6 @@ stat_stuff* stat_init();
 stat_stuff* stat_add(stat_stuff*,double,void (*)(stat_node*));
 void stat_run(stat_stuff* st,time_t now);
 char* stat_msg(stat_stuff* st);
+void st_make_message(stat_node* st, const char* format,...);
 
 #endif

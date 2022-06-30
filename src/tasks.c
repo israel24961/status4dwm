@@ -58,9 +58,7 @@ void get_cpu_usage(stat_node* st)
 void task_5secs(stat_node* st){
     static int i=0;
     free(st->msg.txt);
-    st->msg.len=snprintf(NULL,0,"%fSecs:%i",st->period_secs,i);
-    st->msg.txt=malloc(st->msg.len+1);
-    snprintf(st->msg.txt,st->msg.len+1,"%fSecs:%i",st->period_secs,i++);
+    st_make_message(st,"%fSecs:%i",st->period_secs,i);
 }
 //-lcurl
 void get_xmr(stat_node* st){
