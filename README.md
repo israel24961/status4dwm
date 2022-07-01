@@ -1,6 +1,7 @@
 # STATUS4DWM
 Simple status for [dwm](https://dwm.suckless.org/)
 
+Sample: ![altext](https://isalt.xyz/pics/projects/status4dwm_libcurl.png)
 ## Build
 ### Libraries needed:
 
