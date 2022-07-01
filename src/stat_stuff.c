@@ -30,6 +30,9 @@ typedef  struct stat_stuff
 stat_stuff* stat_init()
 {
     CHK_MALLOC(stat,stat_stuff,1);
+    stat->complete_msg.len=0;
+    stat->complete_msg.txt=NULL;
+    stat->head=NULL;
     return stat;
 }
 stat_stuff* stat_add(stat_stuff* st,double period_secs, void (*task)(stat_node*)){

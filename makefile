@@ -10,17 +10,19 @@ all: config.mk info build ${SRCS}
 build: dirs ${SRCS}
 	@${CC} ${SRCS} -o ${BINDIR}/${NAME} ${CFLAGS} ${CLIBS}
 
-clean: 
+clean:
 	@echo "Cleaning"
 	@rm -rd ${BINDIR} || echo "Error removing"
 
-info: 
+info:
 	@echo "${NAME} v${VERSION} compiled with:"
 	@echo "CC       = ${CC}"
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "CLIBS    = ${CLIBS}"
 
-debug: CFLAGS += -g -DDEBUG
+debug: Os =
+debug: CFLAGS += -Wall -Wundef -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wstrict-overflow=5  -Wwrite-strings -Waggregate-return \
+	-ggdb3  -DDEBUG
 debug: all
 
 dirs:
