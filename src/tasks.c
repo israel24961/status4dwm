@@ -1,6 +1,5 @@
 #include "tasks.h"
-#include <sys/wait.h>
-#include <unistd.h>
+
 
 void task_2secs(stat_node* st){
     static int j=0;
@@ -26,19 +25,32 @@ void xsetroot_update(stat_stuff* st)
     }
     wait(NULL);
 }
-#define st_constmsg(st,str) st->msg.txt=str;        \
-                            st->msg.len=sizeof(str);
+#define st_constmsg(st,str) st->msg.txt=malloc(sizeof(str));\
+                            memcpy(st->msg.txt,str,sizeof(str));\
+                            st->msg.len=sizeof(str)-1;
 void get_cpu_usage(stat_node* st)
 {
+    static FILE* fload=NULL;
+    fload=NULL==fload?fopen("/proc/loadavg","r"):fload;
+    if (NULL==fload)
+    {
+        free(st->msg.txt);
+        st_constmsg(st,"NO POSIX");
+        return;
+    }
+    rewind(fload);
+    double avgs[3];
+    char *buffer=malloc(32);buffer[31]=0;
+    fread(buffer,1,31,fload);
+    for(struct {int i;char* nxt;} s={0} ;s.i<3;s.i++){
+        s.nxt= (s.nxt==NULL) ? buffer :s.nxt;
+        if(s.nxt != NULL)
+            avgs[s.i]=strtod(s.nxt,&s.nxt);
+    }
+    free(buffer);
     char *cd_emoji= "\U0001F4BF";
     char *dvd_emoji="\U0001F4C0";
     char* format="%s%.2f,%.2f,%.2f";
-    double avgs[3];
-    if(getloadavg(avgs,3)<0)
-    {
-        st_constmsg(st,"error load avg");
-        return;
-    }
     char *c_emoji= st->msg.txt != NULL ?
         st->msg.txt[2]==-110?
                 dvd_emoji:
@@ -48,6 +60,7 @@ void get_cpu_usage(stat_node* st)
     st->msg.len=snprintf(NULL,0,format,c_emoji,avgs[0],avgs[1],avgs[2]);
     void* tmp=NULL;
     if(NULL==(tmp=realloc(st->msg.txt,st->msg.len+1))) {
+        free(st->msg.txt);
         st_constmsg(st,"error realloc");
         return;
     }else {
@@ -70,7 +83,7 @@ void task_5secs(stat_node* st){
 static int CURL_GLOBAL_CALLED=0;
 //Null ended *buffer, ensured
 size_t get_xmr_write_data(void* buffer,size_t size, size_t nmemb,void *userp){
-    size_t realsize = size * nmemb;
+  size_t realsize = size * nmemb;
   struct {char* bytes;size_t size;} *mem =userp;
 
   char *ptr = realloc(mem->bytes, mem->size + realsize + 1);
@@ -113,6 +126,11 @@ double get_xmr_curl_setup(stat_node* st) {
     struct {char* bytes;size_t size;} dmem={.bytes=malloc(0),.size=0};
     curl_easy_setopt(hnd,CURLOPT_WRITEDATA,&dmem);
     CURLcode ret= curl_easy_perform(hnd);
+    if (ret)
+    {
+        st_constmsg(st,"📶 ❌");
+        return INT_MAX;
+    }
 
     //curl_easy_cleanup(hnd);
     //hnd = NULL;
@@ -120,7 +138,10 @@ double get_xmr_curl_setup(stat_node* st) {
     json_object *obj=json_tokener_parse(dmem.bytes);
     json_object *arr= json_object_object_get(obj,"bids");
     if(json_object_get_type(arr) != json_type_array)
+    {
         st_constmsg(st,"err: hackers attacking");
+        return INT_MAX;
+    }
     json_object *arr_0=json_object_array_get_idx(arr,0);
     json_object *val=json_object_array_get_idx(arr_0,0);
     double i=json_object_get_double(val);
@@ -128,14 +149,43 @@ double get_xmr_curl_setup(stat_node* st) {
     return i;
 }
 void get_xmr(stat_node* st){
+    free(st->msg.txt);
     if (system("ping -c 1 -W 1 8.8.8.8 1>/dev/null 2>/dev/null")!=0)
     {
-        st_constmsg(st,"NoInternet");
+        st_constmsg(st,"📶 ❌");
+        return ;
     }
     double i=get_xmr_curl_setup(st);
-    free(st->msg.txt);
-    const char * fmt="💵/XMR: %.2f";
-    st->msg.len=snprintf(NULL,0,fmt,i);
-    st->msg.txt=malloc(st->msg.len+1);
-    snprintf(st->msg.txt,st->msg.len+1,fmt,i);
+    if (i ==INT_MAX)
+    {
+        st_constmsg(st,"📶 ❌");
+        return ;
+    }
+
+    const char * fmt="XMR:%.2f💵" ;
+    st_make_message(st,fmt,i);
+
 }
+const char* week_str(int day)
+{
+    const char* week[]={"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
+    return week[day-1];
+}
+const char* month_str(int month)
+{
+    const char* months[]={
+        "Jan","Feb","Mar","Apr",
+        "May","Jun","Jul","Aug",
+        "Sep","Oct","Nov","Dec"};
+    return months[month];
+}
+
+void get_date_hour(stat_node* st){
+    free(st->msg.txt);
+    struct tm *tms=localtime(&st->last_secs);
+    const char* fmt ="%02i:%02i%s%02i/%s";//week_day day/month-hour:minute
+    st_make_message(st,fmt, 
+                            tms->tm_hour, tms->tm_min,
+                            week_str(tms->tm_wday), tms->tm_mday, month_str(tms->tm_mon));
+}
+
