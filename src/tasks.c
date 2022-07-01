@@ -30,16 +30,27 @@ void xsetroot_update(stat_stuff* st)
                             st->msg.len=sizeof(str)-1;
 void get_cpu_usage(stat_node* st)
 {
+    static FILE* fload=NULL;
+    fload=NULL==fload?fopen("/proc/loadavg","r"):fload;
+    if (NULL==fload)
+    {
+        free(st->msg.txt);
+        st_constmsg(st,"NO POSIX");
+        return;
+    }
+    rewind(fload);
+    double avgs[3];
+    char *buffer=malloc(32);buffer[31]=0;
+    fread(buffer,1,31,fload);
+    for(struct {int i;char* nxt;} s={0} ;s.i<3;s.i++){
+        s.nxt= (s.nxt==NULL) ? buffer :s.nxt;
+        if(s.nxt != NULL)
+            avgs[s.i]=strtod(s.nxt,&s.nxt);
+    }
+    free(buffer);
     char *cd_emoji= "\U0001F4BF";
     char *dvd_emoji="\U0001F4C0";
     char* format="%s%.2f,%.2f,%.2f";
-    double avgs[3];
-    if(getloadavg(avgs,3)<0)
-    {
-        free(st->msg.txt);
-        st_constmsg(st,"error load avg");
-        return;
-    }
     char *c_emoji= st->msg.txt != NULL ?
         st->msg.txt[2]==-110?
                 dvd_emoji:
