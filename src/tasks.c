@@ -217,7 +217,7 @@ void get_date_hour(stat_node* st){
             tms->tm_hour, tms->tm_min,
             week_str(tms->tm_wday), tms->tm_mday, month_str(tms->tm_mon));
 }
-char* smallprintf(char* fmt,...)
+char* smallprintf(const char* fmt,...)
 {
     va_list ap;
     va_start(ap,fmt);
@@ -241,8 +241,7 @@ enum power_status{
     p_s_batFull
 };
 typedef struct {double percentage; enum power_status status;} chk_power;
-chk_power* check_power()
-{
+chk_power* check_power(void) {
     chk_power* r= malloc(sizeof(chk_power));
     r->status=p_s_NOBATTERY;
     const char *path_folder="/sys/class/power_supply";
