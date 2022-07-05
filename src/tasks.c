@@ -323,7 +323,7 @@ void get_power(stat_node* st){
             st_make_message(st,"%s","🔌¿🔋?");
             break;
         case p_s_batCharging:
-            st_make_message(st,"%i%s",(int)p->percentage*100,"🔌🔋");
+            st_make_message(st,"%i%s",(int)(p->percentage*100),"🔌🔋");
             break;
         case p_s_batDischarging:
             st_make_message(st,"%i%s",(int)(p->percentage*100),p->percentage < 0.4 ?"🪫":"🔋");
