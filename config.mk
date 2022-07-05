@@ -12,7 +12,8 @@ BINDIR=bin
 CLIBS = -lcurl	\
 				-I/usr/include/json-c -ljson-c
 # flags
-CFLAGS   = -std=c17 -pedantic -Wall -Os
+Os=-Os
+CFLAGS   = -std=c17 -pedantic -Wall ${Os}
 
 # compiler and linker
 CC= cc -lm

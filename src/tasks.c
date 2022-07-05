@@ -10,7 +10,7 @@ void task_2secs(stat_node* st){
 }
 void xsetroot_update(stat_stuff* st)
 {
-    char* arg[4];
+    char const* arg[4];
     arg[0]="/usr/bin/xsetroot";
     arg[1]="-name";
     arg[2]=stat_msg(st);
@@ -76,10 +76,10 @@ void get_cpu_usage(stat_node* st)
             avgs[s.i]=strtod(s.nxt,&s.nxt);
     }
     free(buffer);
-    char *cd_emoji= "\U0001F4BF";
-    char *dvd_emoji="\U0001F4C0";
-    char* format="%s%.2f,%.2f,%.2f";
-    char *c_emoji= st->msg.txt != NULL ?
+    const char *cd_emoji= "\U0001F4BF";
+    const char *dvd_emoji="\U0001F4C0";
+    const char* format="%s%.2f,%.2f,%.2f";
+    char const *c_emoji= st->msg.txt != NULL ?
         st->msg.txt[2]==-110?
                 dvd_emoji:
                 cd_emoji:
@@ -136,22 +136,22 @@ double get_xmr_curl_setup(stat_node* st) {
     }
     static CURL *hnd=NULL;
 
-    if(hnd==NULL)
-    {
-    hnd = curl_easy_init();
-    curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-    curl_easy_setopt(hnd, CURLOPT_URL, "https://api.binance.com/api/v3/depth\?symbol=XMRUSDT&limit=1");
-    curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1L);
-    curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.83.1");
-    curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-    curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-    curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-    curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(hnd,CURLOPT_WRITEFUNCTION,get_xmr_write_data);
+    if (hnd == NULL){
+        hnd = curl_easy_init();
+        curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
+        curl_easy_setopt(hnd, CURLOPT_URL, "https://api.binance.com/api/v3/depth\?symbol=XMRUSDT&limit=1");
+        curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+        curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1L);
+        curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.83.1");
+        curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
+        curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+        curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
+        curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+        curl_easy_setopt(hnd,CURLOPT_WRITEFUNCTION,get_xmr_write_data);
     }
-    struct {char* bytes;size_t size;} dmem={.bytes=malloc(0),.size=0};
+    struct {char* bytes;size_t size;} dmem=
+    {.bytes=malloc(0),.size=0};
     curl_easy_setopt(hnd,CURLOPT_WRITEDATA,&dmem);
     CURLcode ret= curl_easy_perform(hnd);
     if (ret)
@@ -213,9 +213,9 @@ void get_date_hour(stat_node* st){
     free(st->msg.txt);
     struct tm *tms=localtime(&st->last_secs);
     const char* fmt ="%02i:%02i%s%02i/%s";//week_day day/month-hour:minute
-    st_make_message(st,fmt, 
-                            tms->tm_hour, tms->tm_min,
-                            week_str(tms->tm_wday), tms->tm_mday, month_str(tms->tm_mon));
+    st_make_message(st,fmt,
+            tms->tm_hour, tms->tm_min,
+            week_str(tms->tm_wday), tms->tm_mday, month_str(tms->tm_mon));
 }
 char* smallprintf(char* fmt,...)
 {
