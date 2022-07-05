@@ -25,6 +25,34 @@ void xsetroot_update(stat_stuff* st)
     }
     wait(NULL);
 }
+char* file2str(char* filepath){
+    FILE* fload=fopen(filepath,"r");
+    if (NULL==fload)
+    {
+        return 0;
+    }
+    fseek(fload,0,SEEK_END);
+    size_t len=ftell(fload);
+    fseek(fload,0,SEEK_SET);
+    char *str=malloc(len+1);
+    bzero(str,len+1);
+
+    fread(str,len,1,fload);
+    fclose(fload);
+    return str;
+}
+long file2l(char* filepath){
+    char* str= file2str(filepath);
+    long r=strtol(str,NULL,10);
+    free(str);
+    return r;
+}
+double file2double(char* filepath){
+    char* str= file2str(filepath);
+    double r=strtod(str,NULL);
+    free(str);
+    return r;
+}
 #define st_constmsg(st,str) st->msg.txt=malloc(sizeof(str));\
                             memcpy(st->msg.txt,str,sizeof(str));\
                             st->msg.len=sizeof(str)-1;
@@ -136,6 +164,7 @@ double get_xmr_curl_setup(stat_node* st) {
     //hnd = NULL;
 
     json_object *obj=json_tokener_parse(dmem.bytes);
+    free(dmem.bytes);
     json_object *arr= json_object_object_get(obj,"bids");
     if(json_object_get_type(arr) != json_type_array)
     {
@@ -187,5 +216,127 @@ void get_date_hour(stat_node* st){
     st_make_message(st,fmt, 
                             tms->tm_hour, tms->tm_min,
                             week_str(tms->tm_wday), tms->tm_mday, month_str(tms->tm_mon));
+}
+char* smallprintf(char* fmt,...)
+{
+    va_list ap;
+    va_start(ap,fmt);
+    size_t len= vsnprintf(NULL,0,fmt,ap);
+    va_end(ap);
+    char* txt=malloc(len+1);
+    txt[len]=0;
+    va_start(ap,fmt);
+    len= vsnprintf(txt,len+1,fmt,ap);
+    va_end(ap);
+    return txt;
+}
+////////////////BATTERY////////////////
+#include <dirent.h>
+enum power_status{
+    p_s_NOBATTERY,
+    p_s_batUnknown,
+    p_s_batCharging,
+    p_s_batDischarging,
+    p_s_batNotcharging,
+    p_s_batFull
+};
+typedef struct {double percentage; enum power_status status;} chk_power;
+chk_power* check_power()
+{
+    chk_power* r= malloc(sizeof(chk_power));
+    r->status=p_s_NOBATTERY;
+    const char *path_folder="/sys/class/power_supply";
+    DIR *target_d;
+    target_d=opendir(path_folder);
+    if (target_d == NULL){
+        r->status=p_s_NOBATTERY;
+        r->percentage=0;
+        return r;
+    }
+    struct dirent *esp_d;
+    char* fname=NULL;
+    while(NULL != (esp_d=readdir(target_d))){
+        int isBat=!strncmp(esp_d->d_name,"BAT",3);
+        if (isBat) {
+            fname=smallprintf("%s/%s",path_folder,esp_d->d_name);
+            break;
+        }
+    }
+    closedir(target_d);
+    if (fname==NULL) {//No battery modules
+        r->status=p_s_NOBATTERY;
+        r->percentage=100.0;
+        return r;
+    }
+    char *present=smallprintf("%s/%s",fname,"present");
+    double c_pre=file2l(present);
+    free(present);
+    if(c_pre!=1) {
+        r->status=p_s_NOBATTERY;
+        r->percentage=0;
+        return r; }
+    //A battery present
+
+    char *charge_full=smallprintf("%s/%s",fname,"charge_full");
+    char *charge_now= smallprintf("%s/%s",fname,"charge_now");
+    char *status=     smallprintf("%s/%s",fname,"status");
+    free(fname);
+    long c_full=file2l(charge_full);
+    free(charge_full);
+    long c_now=file2l(charge_now);
+    free(charge_now);
+    r->percentage=c_now/(double)c_full;
+
+    char* c_st=file2str(status);
+    free(status);
+    switch(*c_st){
+        case 'U':
+            r->status=p_s_batUnknown;
+            break;
+        case 'C':
+            r->status=p_s_batCharging;
+            break;
+        case 'D':
+            r->status=p_s_batDischarging;
+            break;
+        case 'N':
+            r->status=p_s_batNotcharging;
+            break;
+        case 'F':
+            r->status=p_s_batFull;
+            break;
+        default:
+            r->status=p_s_batUnknown;
+            break;
+    }
+    free(c_st);
+
+    return r;
+}
+void get_power(stat_node* st){
+    free(st->msg.txt);
+    chk_power* p= check_power();
+    switch(p->status){
+        case p_s_NOBATTERY:
+            st_make_message(st,"%s","🔌");
+            break;
+        case p_s_batUnknown:
+            st_make_message(st,"%s","🔌¿🔋?");
+            break;
+        case p_s_batCharging:
+            st_make_message(st,"%i%s",(int)p->percentage*100,"🔌🔋");
+            break;
+        case p_s_batDischarging:
+            st_make_message(st,"%i%s",(int)(p->percentage*100),p->percentage < 0.4 ?"🪫":"🔋");
+            break;
+        case p_s_batNotcharging:
+            st_make_message(st,"%i%s",(int)(p->percentage*100),"🔌🔋🤯");
+            break;
+        case p_s_batFull:
+            st_make_message(st,"%i%s",(int)(p->percentage*100),"🔋");
+            break;
+    }
+    free(p);
+
 }
 

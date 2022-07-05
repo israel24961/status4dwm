@@ -10,6 +10,7 @@ int main()
     stat_add(st,5.0f,get_xmr);
     stat_add(st,3.0f,get_cpu_usage);
     stat_add(st,2.0f,get_date_hour);
+    stat_add(st,2.0f,get_power);
     while(1) {
         sleep(1);
         stat_run(st,time(NULL));
