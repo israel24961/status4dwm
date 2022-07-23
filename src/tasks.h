@@ -13,5 +13,6 @@ void get_cpu_usage(stat_node* st);
 void get_xmr(stat_node* st);
 void get_date_hour(stat_node* st);
 void get_power(stat_node* st);
+void get_temperature(stat_node* st);
 
 #endif

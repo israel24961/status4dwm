@@ -212,7 +212,7 @@ const char* month_str(int month)
 void get_date_hour(stat_node* st){
     free(st->msg.txt);
     struct tm *tms=localtime(&st->last_secs);
-    const char* fmt ="%02i:%02i%s%02i/%s";//week_day day/month-hour:minute
+    const char* fmt ="%02i:%02i⏲%s%02i/%s";//week_day day/month-hour:minute
     st_make_message(st,fmt,
             tms->tm_hour, tms->tm_min,
             week_str(tms->tm_wday), tms->tm_mday, month_str(tms->tm_mon));
@@ -337,5 +337,73 @@ void get_power(stat_node* st){
     }
     free(p);
 
+}
+//TOMAYBEDO: Should this be a function
+#define append_node(type,head,new_node)  type* __last=head;\
+                                         if(__last != NULL)\
+                                            { while(__last!=NULL && __last->next!=NULL)\
+                                                {__last=__last->next;}\
+                                              __last->next=new_node;}\
+                                         else\
+                                            head=new_node;
+
+#define clean_tree(type,head)          type* __last=head;\
+                                      while(__last!=NULL)\
+                                        {type* __tmp=__last;__last=__last->next;free(__tmp);}\
+
+//================ Temperature ================
+#define newLinkedList(type) \
+    typedef struct #type"_lnk";\
+    typedef struct type"_lnk"{type*  }
+                            
+typedef struct long_LkdList long_LkdList;
+typedef struct long_LkdList{long this;long_LkdList* next;} long_LkdList;
+typedef struct string_LkdList string_LkdList;
+typedef struct string_LkdList{size_t len;long* this;string_LkdList* next;} string_LkdList;
+long_LkdList* checktemperature(void){
+    const char *thermal_path="/sys/class/thermal";
+    DIR *thermal_dirs;
+    thermal_dirs=opendir(thermal_path);
+    if (thermal_dirs == NULL){
+        long_LkdList* r=malloc(sizeof(long_LkdList));
+        *r=(long_LkdList) {.this=0L,.next=NULL};
+        return r;
+    }
+    const char *folder_pattern="thermal_zone";
+    struct dirent *esp_d;
+    char* fname=NULL;
+    long_LkdList* r=NULL;
+    while(NULL != (esp_d=readdir(thermal_dirs))){
+        int res=!strncmp(esp_d->d_name,folder_pattern,strlen(folder_pattern));
+        if (res) {
+            fname=smallprintf("%s/%s/%s",thermal_path,esp_d->d_name,"temp");
+            long temperature=file2l(fname); free(fname);
+            long_LkdList* newEntry=malloc(sizeof(long_LkdList));
+            *newEntry=(long_LkdList){.this=temperature,.next=NULL};
+            append_node(long_LkdList,r,newEntry);
+        }
+    }
+    closedir(thermal_dirs);
+    return r;
+}
+void get_temperature(stat_node* st){
+    free(st->msg.txt);
+    long_LkdList* l=checktemperature();
+    if(l == NULL)
+        st_make_message(st,"🤒");
+    else
+    {
+        long_LkdList* last=l;
+        int index=0;
+        long ammount=0;
+        while(last!= NULL)
+        {
+            ammount= ammount < last->this ? last->this : ammount;
+            index++;
+            last=last->next;
+        }
+        st_make_message(st,"🌡%lu" ,ammount/1000);
+        clean_tree(long_LkdList,l);
+    }
 }
 
