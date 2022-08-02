@@ -19,6 +19,7 @@ typedef struct
 typedef  struct stat_stuff
 {
     sstr complete_msg;
+    void(*log)(sstr*);
     stat_node* head;
 } stat_stuff;
 
@@ -27,12 +28,24 @@ typedef  struct stat_stuff
                                      while(__last->next!=NULL)\
                                         {__last=__last->next;}\
                                         __last->next=new_node;
+//Frees sstr after usage and sstr.txt
+void logging_to_file(sstr* info)
+{
+    if (!isFolder())
+        makeFolder();
+    static FILE* open_file=NULL;
+    if (open_file==NULL)
+        openfile();
+    writetofile(info);
+
+}
 stat_stuff* stat_init()
 {
     CHK_MALLOC(stat,stat_stuff,1);
     stat->complete_msg.len=0;
     stat->complete_msg.txt=NULL;
     stat->head=NULL;
+    stat->log=logging_to_file;
     return stat;
 }
 stat_stuff* stat_add(stat_stuff* st,double period_secs, void (*task)(stat_node*)){
