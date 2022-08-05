@@ -2,20 +2,22 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "utils.h"
 #include "tasks.h"
+#include <time.h>
 
 void add_tasks(stat_stuff* st);
 
-int main(int argc, char** args)
-{
+int main(int argc, char** args) {
     stat_stuff* st=stat_init();
+    logging_init();
     add_tasks(st);
 
     while(1) {
         sleep(2);
-        stat_run(st,time(NULL));
-        //printf("%s\n", stat_msg(st)); //quick debug
+        stat_run(st, time(NULL));
         xsetroot_update(st);
+        u_log(stat_msg(st));
     }
     return 0;
 }

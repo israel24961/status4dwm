@@ -1,5 +1,5 @@
 #include "tasks.h"
-
+#include "utils.h"
 
 void task_2secs(stat_node* st){
     static int j=0;
@@ -216,19 +216,6 @@ void get_date_hour(stat_node* st){
     st_make_message(st,fmt,
             tms->tm_hour, tms->tm_min,
             week_str(tms->tm_wday), tms->tm_mday, month_str(tms->tm_mon));
-}
-char* smallprintf(const char* fmt,...)
-{
-    va_list ap;
-    va_start(ap,fmt);
-    size_t len= vsnprintf(NULL,0,fmt,ap);
-    va_end(ap);
-    char* txt=malloc(len+1);
-    txt[len]=0;
-    va_start(ap,fmt);
-    len= vsnprintf(txt,len+1,fmt,ap);
-    va_end(ap);
-    return txt;
 }
 ////////////////BATTERY////////////////
 #include <dirent.h>
