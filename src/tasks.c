@@ -138,7 +138,7 @@ double get_xmr_curl_setup(stat_node* st) {
 
     if (hnd == NULL){
         hnd = curl_easy_init();
-        curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
+        curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 1024L);
         curl_easy_setopt(hnd, CURLOPT_URL, "https://api.binance.com/api/v3/depth\?symbol=XMRUSDT&limit=1");
         curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
         curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1L);
@@ -147,8 +147,8 @@ double get_xmr_curl_setup(stat_node* st) {
         curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
         curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "GET");
         curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-        curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
         curl_easy_setopt(hnd,CURLOPT_WRITEFUNCTION,get_xmr_write_data);
+        curl_easy_setopt(hnd,CURLOPT_TIMEOUT,3L);
     }
     struct {char* bytes;size_t size;} dmem=
     {.bytes=malloc(0),.size=0};
@@ -198,7 +198,7 @@ void get_xmr(stat_node* st){
 const char* week_str(int day)
 {
     const char* week[]={"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
-    return week[day-1];
+    return week[day];
 }
 const char* month_str(int month)
 {
