@@ -59,7 +59,7 @@ void u_log(char* fmt, ...){
     char* tolog=vsmallprintf(fmt,ap); va_end(ap);
     char* result=smallprintf("%s%s",date,tolog);
     free(date); free(tolog);
-    printf("%s",result);
+    printf("%s\r\n",result);
     free(result);
 }
 

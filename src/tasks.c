@@ -197,7 +197,7 @@ void get_xmr(stat_node* st){
 }
 const char* week_str(int day)
 {
-    const char* week[]={"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
+    const char* week[]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
     return week[day];
 }
 const char* month_str(int month)
