@@ -25,6 +25,11 @@ void xsetroot_update(stat_stuff* st)
     }
     wait(NULL);
 }
+/**
+ * If file doesn't exist, returns NULL
+ *
+ *
+ **/
 char* file2str(char* filepath){
     FILE* fload=fopen(filepath,"r");
     if (NULL==fload)
@@ -41,14 +46,22 @@ char* file2str(char* filepath){
     fclose(fload);
     return str;
 }
+/**
+ * If file doesn't exist, returns 0
+ *
+ **/
 long file2l(char* filepath){
     char* str= file2str(filepath);
+    if(str == NULL)
+        return 0;
     long r=strtol(str,NULL,10);
     free(str);
     return r;
 }
 double file2double(char* filepath){
     char* str= file2str(filepath);
+    if(str == NULL)
+        return 0;
     double r=strtod(str,NULL);
     free(str);
     return r;
@@ -148,7 +161,7 @@ double get_xmr_curl_setup(stat_node* st) {
         curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "GET");
         curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
         curl_easy_setopt(hnd,CURLOPT_WRITEFUNCTION,get_xmr_write_data);
-        curl_easy_setopt(hnd,CURLOPT_TIMEOUT,3L);
+        curl_easy_setopt(hnd,CURLOPT_TIMEOUT,5L);
     }
     struct {char* bytes;size_t size;} dmem=
     {.bytes=malloc(0),.size=0};
@@ -263,15 +276,12 @@ chk_power* check_power(void) {
         return r; }
     //A battery present
 
-    char *charge_full=smallprintf("%s/%s",fname,"charge_full");
-    char *charge_now= smallprintf("%s/%s",fname,"charge_now");
+    char *charge_now= smallprintf("%s/%s",fname,"capacity");
     char *status=     smallprintf("%s/%s",fname,"status");
     free(fname);
-    long c_full=file2l(charge_full);
-    free(charge_full);
-    long c_now=file2l(charge_now);
+
+    r->percentage=file2l(charge_now);
     free(charge_now);
-    r->percentage=c_now/(double)c_full;
 
     char* c_st=file2str(status);
     free(status);
@@ -310,16 +320,16 @@ void get_power(stat_node* st){
             st_make_message(st,"%s","🔌¿🔋?");
             break;
         case p_s_batCharging:
-            st_make_message(st,"%i%s",(int)(p->percentage*100),"🔌🔋");
+            st_make_message(st,"%i%s",(int)(p->percentage),"🔌🔋");
             break;
         case p_s_batDischarging:
-            st_make_message(st,"%i%s",(int)(p->percentage*100),p->percentage < 0.4 ?"🪫":"🔋");
+            st_make_message(st,"%i%s",(int)(p->percentage),p->percentage < 30 ?"🪫":"🔋");
             break;
         case p_s_batNotcharging:
-            st_make_message(st,"%i%s",(int)(p->percentage*100),"🔌🔋🤯");
+            st_make_message(st,"%i%s",(int)(p->percentage),"🔌🔋🤯");
             break;
         case p_s_batFull:
-            st_make_message(st,"%i%s",(int)(p->percentage*100),"🔋");
+            st_make_message(st,"%i%s",(int)(p->percentage),"🔋");
             break;
     }
     free(p);
