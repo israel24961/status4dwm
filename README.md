@@ -8,6 +8,38 @@ git clone https://github.com/israel24961/status4dwm
 cd status4dwm
 make
 ```
+
+### Debug Mode
+To see exactly when xsetroot updates occur, build with debug mode:
+```
+make debug
+```
+This will print timestamps and messages to stderr whenever the status bar updates, for example:
+```
+[2026-02-17 12:34:56] xsetroot update: 2.000000Secs:5|5.000000Secs:2|💿0.15,0.12,0.08|hi
+[2026-02-17 12:34:58] xsetroot update: 2.000000Secs:6|5.000000Secs:2|💿0.15,0.12,0.08|hi
+```
+
+## Status Bar Updates
+
+### When does it write to xsetroot?
+The status bar is updated using `xsetroot -name` **every time any task's timer fires**. 
+
+For example, with the default configuration:
+- Task with 2 second period → updates every 2 seconds
+- Task with 3 second period → updates every 3 seconds  
+- Task with 5 second period → updates every 5 seconds
+
+**Result**: The status bar updates frequently (whenever any timer fires), ensuring all information stays current.
+
+### Update Mechanism
+- Uses **libev** event loop with `ev_timer` watchers
+- Each task has its own timer based on its `period_secs`
+- When a timer fires: task executes → message updates → `xsetroot` is called
+- All task messages are combined with `|` separators and displayed
+
+**Note**: The application uses `xsetroot`, not `xprop`.
+
 ## How it works
 Simple linked list of structs,with  period of execution, function to execute and message
 

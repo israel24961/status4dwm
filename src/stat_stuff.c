@@ -111,6 +111,15 @@ void st_make_message(stat_node* st, const char* format,...)
 // Update the status bar using xsetroot
 void xsetroot_update(stat_stuff* st)
 {
+#ifdef DEBUG
+    // Log update timestamp and message in debug mode
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char time_buffer[26];
+    strftime(time_buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+    fprintf(stderr, "[%s] xsetroot update: %s\n", time_buffer, stat_msg(st));
+#endif
+
     char* arg[4];
     arg[0]="/usr/bin/xsetroot";
     arg[1]="-name";
@@ -128,6 +137,10 @@ void xsetroot_update(stat_stuff* st)
 }
 
 // Timer callback for libev
+// This callback fires whenever ANY task's timer expires, based on its period_secs.
+// Each timer firing triggers: task execution → message rebuild → xsetroot update.
+// With multiple tasks at different periods (e.g., 2s, 3s, 5s), xsetroot is called
+// frequently to keep the status bar current.
 static void timer_callback(EV_P_ ev_timer *w, int revents)
 {
     (void)revents; // unused parameter
@@ -166,7 +179,7 @@ static void timer_callback(EV_P_ ev_timer *w, int revents)
     }
     st->complete_msg.txt=total_msg;
     
-    // Update the status bar
+    // Update the status bar (called on every timer fire)
     xsetroot_update(st);
 }
 
