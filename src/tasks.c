@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include "tasks.h"
 #include <sys/wait.h>
 #include <unistd.h>
