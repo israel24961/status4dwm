@@ -10,16 +10,23 @@ void task_2secs(stat_node* st){
 }
 void xsetroot_update(stat_stuff* st)
 {
-    char* arg[4];
-    arg[0]="/usr/bin/xsetroot";
-    arg[1]="-name";
-    arg[2]=stat_msg(st);
-    arg[3]=NULL;
+    char* arg[] = {
+        "/usr/bin/xprop",
+        "-root",
+        "-set",
+        "WM_NAME",
+         NULL,
+         NULL
+    };
+    // arg[0]="/usr/bin/xprop";
+    // arg[1]="-name";
+    arg[4]=stat_msg(st);
+    arg[5]=NULL;
     if( 0==fork())
     {
         if (-1 == execv(arg[0],(char**)arg))
         {
-            perror("child process execv failed[%m]\n");
+            perror("child process execv failed \n");
             exit(-1);
         }
     }

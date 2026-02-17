@@ -9,11 +9,11 @@ SRCDIR=src
 BINDIR=bin
 
 # includes and libs
-CLIBS =  
+CLIBS =  -lm
 
 # flags
-CFLAGS   = -std=c17 -pedantic -Wall -Os
+CFLAGS   = -std=gnu23 -pedantic -Wall -Os
 
 # compiler and linker
-CC= cc -lm
+CC= cc 
 VERBOSE= TRUE

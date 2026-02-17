@@ -3,16 +3,18 @@ SRCS= ${SRCDIR}/${NAME}.c			\
 			${SRCDIR}/stat_stuff.c	\
 			${SRCDIR}/tasks.c
 
-all: config.mk info build ${SRCS}
+TARGET = ${BINDIR}/${NAME}
 
+all: config.mk info ${TARGET}
 
+${TARGET}: ${SRCS} | dirs
 
 build: dirs ${SRCS}
-	@${CC} ${SRCS} -o ${BINDIR}/${NAME} ${CFLAGS} ${CLIBS}
+	@${CC} ${CFLAGS} ${SRCS} -o ${BINDIR}/${NAME}  ${CLIBS}
 
 clean: 
 	@echo "Cleaning"
-	@rm -rd ${BINDIR} || echo "Error removing"
+	@rm -rf ${BINDIR} || echo "Error removing"
 
 info: 
 	@echo "${NAME} v${VERSION} compiled with:"
