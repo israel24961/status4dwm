@@ -9,7 +9,7 @@ SRCDIR=src
 BINDIR=bin
 
 # includes and libs
-CLIBS =  
+CLIBS = -lev
 
 # flags
 CFLAGS   = -std=c17 -pedantic -Wall -Os

@@ -8,23 +8,6 @@ void task_2secs(stat_node* st){
     st->msg.txt=malloc(st->msg.len+1);
     snprintf(st->msg.txt,st->msg.len+1,"%fSecs:%i",st->period_secs,j++);
 }
-void xsetroot_update(stat_stuff* st)
-{
-    char* arg[4];
-    arg[0]="/usr/bin/xsetroot";
-    arg[1]="-name";
-    arg[2]=stat_msg(st);
-    arg[3]=NULL;
-    if( 0==fork())
-    {
-        if (-1 == execv(arg[0],(char**)arg))
-        {
-            perror("child process execv failed[%m]\n");
-            exit(-1);
-        }
-    }
-    wait(NULL);
-}
 #define st_constmsg(st,str) st->msg.txt=str;        \
                             st->msg.len=sizeof(str);
 void get_cpu_usage(stat_node* st)
