@@ -111,20 +111,16 @@ void st_make_message(stat_node* st, const char* format,...)
 // Update the status bar using xsetroot
 void xsetroot_update(stat_stuff* st)
 {
-#ifdef DEBUG
-    // Log update timestamp and message in debug mode
-    time_t now = time(NULL);
-    struct tm *tm_info = localtime(&now);
-    char time_buffer[26];
-    strftime(time_buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
-    fprintf(stderr, "[%s] xsetroot update: %s\n", time_buffer, stat_msg(st));
-#endif
-
-    char* arg[4];
-    arg[0]="/usr/bin/xsetroot";
-    arg[1]="-name";
-    arg[2]=stat_msg(st);
-    arg[3]=NULL;
+    char* arg[] = {
+        "/usr/bin/xprop",
+        "-root",
+        "-set",
+        "WM_NAME",
+         NULL,
+         NULL
+    };
+    arg[4]=stat_msg(st);
+    arg[5]=NULL;
     if( 0==fork())
     {
         if (-1 == execv(arg[0],(char**)arg))
