@@ -9,7 +9,7 @@ SRCDIR=src
 BINDIR=bin
 
 # includes and libs
-CLIBS =  -lm
+CLIBS = -lev -lm
 
 # flags
 CFLAGS   = -std=gnu23 -pedantic -Wall -Os

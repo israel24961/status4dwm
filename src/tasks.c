@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include "tasks.h"
 #include <sys/wait.h>
 #include <unistd.h>
@@ -7,30 +8,6 @@ void task_2secs(stat_node* st){
     st->msg.len=snprintf(NULL,0,"%fSecs:%i",st->period_secs,j);
     st->msg.txt=malloc(st->msg.len+1);
     snprintf(st->msg.txt,st->msg.len+1,"%fSecs:%i",st->period_secs,j++);
-}
-void xsetroot_update(stat_stuff* st)
-{
-    char* arg[] = {
-        "/usr/bin/xprop",
-        "-root",
-        "-set",
-        "WM_NAME",
-         NULL,
-         NULL
-    };
-    // arg[0]="/usr/bin/xprop";
-    // arg[1]="-name";
-    arg[4]=stat_msg(st);
-    arg[5]=NULL;
-    if( 0==fork())
-    {
-        if (-1 == execv(arg[0],(char**)arg))
-        {
-            perror("child process execv failed \n");
-            exit(-1);
-        }
-    }
-    wait(NULL);
 }
 #define st_constmsg(st,str) st->msg.txt=str;        \
                             st->msg.len=sizeof(str);
