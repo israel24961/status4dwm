@@ -33,6 +33,9 @@ typedef  struct stat_stuff
 stat_stuff* stat_init()
 {
     CHK_MALLOC(stat,stat_stuff,1);
+    stat->complete_msg.txt = NULL;
+    stat->complete_msg.len = 0;
+    stat->head = NULL;
     stat->loop = ev_loop_new(EVFLAG_AUTO);
     if(stat->loop == NULL) {
         printf("ERROR: Failed to create libev loop\n");
@@ -138,7 +141,10 @@ static void timer_callback(EV_P_ ev_timer *w, int revents)
     stat_stuff* st = (stat_stuff*)ev_userdata(EV_A);
     
     // Update the complete message
-    free(st->complete_msg.txt);
+    if(st->complete_msg.txt != NULL) {
+        free(st->complete_msg.txt);
+        st->complete_msg.txt = NULL;
+    }
     st->complete_msg.len=0;
 
     stat_node* current= st->head;
